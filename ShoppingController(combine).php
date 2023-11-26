@@ -1,5 +1,6 @@
 <?php
 // 引入必要的模型和其他文件
+require_once('login.php');
 require_once('models/ProductModel.php');
 require_once('models/CartModel.php');
 require_once('models/OrderModel.php');
@@ -19,7 +20,7 @@ class ShoppingController {
             $_SESSION['username'] = $username;
 
             // 重定向到首頁或其他頁面
-            header('Location: index.php');
+            header('Location: productListView.php');
             exit;
         } else {
             // 登錄失敗，可能顯示錯誤消息
