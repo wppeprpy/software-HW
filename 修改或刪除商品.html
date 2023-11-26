@@ -1,0 +1,29 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script>
+        function postForm(action) {
+            var form = document.getElementById("myForm");
+            form.action = action;
+            form.submit();
+        }
+    </script>
+</head>
+
+<body>
+
+    <form id="myForm">
+        <!-- Modify Form -->
+        modify id:<input type="number" name="ProductID" len="10"><br>
+        <input type='button' onClick="postForm('輸入修改商品.php')" value="find">
+        <br> 
+        <!-- Delete Form -->
+        delete id:<input type="number" name="id" len="10"><br>
+        <input type='button' onClick="postForm('刪除商品.php')" value="delete"> 
+    </form>
+
+    <div id="main"></div>
+
+</body>
+</html>

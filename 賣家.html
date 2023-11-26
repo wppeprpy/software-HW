@@ -1,0 +1,53 @@
+<html><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script language="javascript">
+
+    function loadURL(URL) {
+        //向URL發出request
+        fetch(URL,{
+            method: 'POST', // or 'GET'
+        })
+        .then(function(res){ //fetch的callback function，傳回值是promise物件: res
+            //將res的內容轉為文字，傳給下一個Callback function
+            return res.text();
+        })
+        .then(function(data){ //下一個callback function，參數data是上一個callback傳進來的文字
+            
+            //找到要顯示內容的div
+            let div = document.getElementById('main');
+            //將傳進來的文字放進div中
+            div.innerHTML=data;
+        })
+    }
+    function postForm(url) {
+        //取得表單物件
+        let form = document.getElementById('myForm');
+        //用表單內容產生一個 formdata物件
+        let mydat = new FormData(form);//拿到資料
+        console.log(mydat)//可以顯示到Console
+    
+        fetch(url,{
+            method: 'POST',//以post的方式送出
+            body: mydat // 將表單物件放入fetch的body屬性
+        })
+        .then(function(res){return res.text(); }) //取得傳回值，轉為文字
+        .then(function(data){ 
+            //找到要顯示內容的div
+            let div = document.getElementById('main');
+		//將傳進來的文字放進div中
+            div.innerHTML=data;
+        })
+    }
+    </script>
+    </head>
+
+    <body >
+    <p> 
+        <button onClick="loadURL('商品列表.php')">商品列表</button>
+        <button onclick="loadURL('加入列表.html')">加商品入列表</button>
+        <button onclick="loadURL('修改或刪除商品.html')">修改或刪除商品</button>
+        
+    </p>
+    <div id="main"></div>
+
+    </body></html>

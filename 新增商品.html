@@ -1,0 +1,21 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+</head>
+<body>
+<!-- <form method="post" action="a1.insert.py"> -->
+
+    <form id="myForm">
+        事項名稱:<input type="text" name="name" len="10"><br>
+        緊急程度:<select name="urgent">
+            <option value="普通" selected>普通</option>
+            <option value="急">急</option>
+            <option value="急死了">急死了</option>
+            </select><br>
+        說明: <textarea name='content'></textarea><br>
+        <input type='button' onClick="postForm('新增待辦事項.php')" value="save"> 
+    </form>
+    <div id="main"></div>
+    </body></html>
