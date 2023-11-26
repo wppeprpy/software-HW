@@ -14,7 +14,7 @@ class ShoppingController {
         $products = ProductModel::getAllProducts();
 
         // 顯示商品列表視圖
-		renderProductList($products);
+	renderProductList($products);
         // productListView.php 文件負責顯示商品列表 $products
     }
 
@@ -23,7 +23,7 @@ class ShoppingController {
         $product = ProductModel::getProductById($productId);
 
         // 顯示單個商品的詳細信息視圖
-		renderProductDetails($product);
+	renderProductDetails($product);
         // productDetailsView.php 文件負責顯示單個商品 $product 的詳細信息
     }
 
@@ -32,7 +32,7 @@ class ShoppingController {
         CartModel::addProductToCart($productId);
 
         // 可能重定向到購物車頁面或其他頁面
-		header('Location: index.php?action=displayProductList');
+	header('Location: index.php?action=displayProductList');
         exit;
     }
 
@@ -41,7 +41,7 @@ class ShoppingController {
         CartModel::removeProductFromCart($productId);
 
         // 可能重定向到購物車頁面或其他頁面
-		header('Location: index.php?action=viewCart');
+	header('Location: index.php?action=viewCart');
         exit;
     }
 
@@ -53,7 +53,7 @@ class ShoppingController {
         $totalPrice = CartModel::calculateTotalPrice($cartItems);
 
         // 顯示購物車視圖
-		renderCartView($cartItems);
+	renderCartView($cartItems);
         // cartView.php 文件負責顯示購物車內的商品 $cartItems 和總價格 $totalPrice
     }
 	
