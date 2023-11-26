@@ -1,0 +1,60 @@
+<?php
+require('dbconfig.php');
+
+function getShoppingCartItems() {
+    global $db;
+    $sql = "select * from shoppingcart;";
+    $stmt = mysqli_prepare($db, $sql);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    $rows = array();
+    while($r = mysqli_fetch_assoc($result)) {
+        $rows[] = $r;
+    }
+    return $rows;
+}
+
+function addToShoppingCart($scName, $scPrice, $scAmount, $id) {
+    global $db;
+    // You might want to verify or change the logic for this condition
+    if($id > 0) {
+        $sql = "update shoppingcart set scName=?, scPrice=?, scAmount=? where id=?";
+        $stmt = mysqli_prepare($db, $sql);
+        mysqli_stmt_bind_param($stmt, "ssii", $scName, $scPrice, $scAmount, $id);
+    } else {
+        $sql = "insert into shoppingcart (scName, scPrice, scAmount) values (?, ?, ?)";
+        $stmt = mysqli_prepare($db, $sql);
+        mysqli_stmt_bind_param($stmt, "ssi", $scName, $scPrice, $scAmount);
+    }
+    mysqli_stmt_execute($stmt);
+    return true;
+}
+
+function updateShoppingCartItem($id, $scName, $scPrice, $scAmount) {
+    // Implement your update logic here
+    echo $id, $scName, $scPrice, $scAmount;
+    return;
+}
+
+function deleteShoppingCartItem($id) {
+    global $db;
+
+    $sql = "delete from shoppingcart where id=?";
+    $stmt = mysqli_prepare($db, $sql);
+    mysqli_stmt_bind_param($stmt, "i", $id);
+    mysqli_stmt_execute($stmt);
+    return true;
+}
+
+// 先修改此函數以計算並回傳總額
+function getTotalAmount() {
+    global $db;
+    $sql = "select sum(scPrice * scAmount) as total from shoppingcart;";
+    $stmt = mysqli_prepare($db, $sql);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $row = mysqli_fetch_assoc($result);
+    return $row['total']; // 回傳計算後的總額
+}
+?>
