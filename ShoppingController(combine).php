@@ -54,7 +54,7 @@ class ShoppingController {
         CartModel::addProductToCart($productId);
 
         // 可能重定向到購物車頁面或其他頁面
-	header('Location: index.php?action=displayProductList');
+	header('Location: productListView.php?action=displayProductList');
         exit;
     }
 
@@ -63,7 +63,7 @@ class ShoppingController {
         CartModel::removeProductFromCart($productId);
 
         // 可能重定向到購物車頁面或其他頁面
-	header('Location: index.php?action=viewCart');
+	header('Location: productListView.php?action=viewCart');
         exit;
     }
 
