@@ -9,6 +9,27 @@ require_once('views/cartView.php');
 require_once('views/orderHistoryView.php');
 
 class ShoppingController {
+    public function login($username, $password) {
+        // 驗證用戶登錄信息
+        $isAuthenticated = authenticateUser($username, $password);
+
+        if ($isAuthenticated) {
+            // 在會話中保存登錄狀態或使用 cookie 來保持登錄狀態
+            $_SESSION['loggedIn'] = true;
+            $_SESSION['username'] = $username;
+
+            // 重定向到首頁或其他頁面
+            header('Location: index.php');
+            exit;
+        } else {
+            // 登錄失敗，可能顯示錯誤消息
+            echo "Login failed. Please try again.";
+            // 或者重新導向到登錄頁面
+            // header('Location: login.php');
+            // exit;
+        }
+    }
+	
     public function displayProductList() {
         // 獲取所有商品列表
         $products = ProductModel::getAllProducts();
@@ -64,7 +85,26 @@ class ShoppingController {
         // 顯示訂單歷史視圖
         renderOrderHistory($orders);
 	}
+    public function checkout($userId) {
+        if ($_SESSION['loggedIn']) {
+            // 獲取購物車內的商品
+            $cartItems = CartModel::getCartItems();
 
+            // 創建訂單
+            $orderId = OrderModel::createOrder($cartItems, $userId);
+
+            // 清空購物車內容
+            CartModel::clearCart();
+
+            // 顯示結帳成功頁面或其他相關操作
+            echo "Checkout successful. Your order ID is: $orderId";
+        } else {
+            // 未登錄，可能重新導向到登錄頁面
+            // header('Location: login.php');
+            // exit;
+            echo "Please login to proceed with checkout.";
+        }
+    }
     // 其他可能的功能，比如用戶登錄、結帳等...
 
 }
