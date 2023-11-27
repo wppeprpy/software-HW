@@ -137,7 +137,7 @@ function addProduct($name, $price, $stock, $content){
     global $db;
 	$sql="insert into product (name, price, stock, content) values (? , ? , ? , ?);";
 	$stmt=mysqli_prepare($db,$sql);
-	mysqli_stmt_bind_param($stmt, "ssss", $name, $price, $stock, $content);
+	mysqli_stmt_bind_param($stmt, "siss", $name, $price, $stock, $content);
 	mysqli_stmt_execute($stmt);
 	return True;
 }
