@@ -136,7 +136,7 @@ class ShoppingController {
     }
     // 其他可能的功能，比如用戶登錄、結帳等...
 }
-// 根據請求處理相應的功能
+// 根據請求處理相應的功能(控制台)
 $shoppingController = new ShoppingController();
 
 if (isset($_POST['submit'])) {
