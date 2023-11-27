@@ -1,0 +1,188 @@
+<html><head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<script type="text/javascript" src="https://unpkg.com/vue@next"></script>
+	</head>
+	
+	<body >
+	<hr />
+	<div id="main">
+	<div id="list" v-if="UI=='main'">
+		<h1>商品列表</h1>
+		<!--<button @click="setAddUI()">新增商品</button>--><button @click="listcart()">查看購物車</button>
+		<table border=1>
+			<tr><td>序號</td><td>商品名稱</td><td>價格</td><td>庫存</td><td>查看更多</td><td>加入購物車</td></tr>
+			<tr v-for="product in dat">
+				<td>{{product.pID}}</td>
+				<td>{{product.name}}</td>
+				<td>{{product.price}}</td>
+				<td>{{product.stock}}</td>
+				<td><button @click="getProductDetail(product.pID)">詳細資訊</button></td><!--程式要改-->
+				<td><button @click="addCart(product.pID)">+1</button></td><!--程式要改-->
+			</tr>
+		</table>
+	</div>
+	<div v-if="UI=='editForm'">
+		商品名稱: <input type="text"  v-model="newproduct.name"/> <br/>
+		價格: <input type="text"  v-model="newproduct.Price"/> <br/>
+		庫存: <input type="text"  v-model="newproduct.Stock"/> <br/>
+	
+		工作說明: <textarea v-model="newproduct.Content"></textarea><br>
+	
+		<input type='button' @click="addJob()" value="save">
+	</div>
+	<div v-if="UI=='detail'" v-for="product in dat">
+		<h1>{{product.name}}</h1>
+		<!--<button @click="setAddUI()">查看購物車</button>-->
+		<table border=1>
+			<tr><td>商品名稱</td><td>價格</td><td>庫存</td><td>商品介紹</td></tr>
+			<tr>
+				<td>{{product.name}}</td>
+				<td>{{product.price}}</td>
+				<td>{{product.stock}}</td>
+				<td>{{product.content}}</td>
+				
+	
+			</tr>
+		</table><button @click="back()">回到商品列表</button>
+	</div>
+	<div v-if="UI=='cart'">
+		<h1>我的購物車</h1>
+		<button @click="back()">回到商品列表</button><!--<button @click="setAddUI()">查看購物車</button>-->
+		<table border=1>
+			<tr><td>商品名稱</td><td>價格</td><td>購買數量</td><td>- </td></tr>
+			<tr v-for="product in dat">
+				<td>{{product.name}}</td>
+				<td>{{product.price}}</td>
+				<td>{{product.amount}}</td>
+				<td><button @click="delCart(product.pID)">刪</button></td>
+			</tr>
+		</table>
+        <h2>總金額：{{totalPrice}}</h2>
+	</div>
+	</div>
+	<script>
+	const todoApp= Vue.createApp({
+		data() {
+			return {
+				UI: 'main',
+				dat: [],
+				newJob: {
+					id: -1,
+					name: '',
+					Price: '',
+					Stock: '',
+					Content: ''
+				},
+                totalPrice: 0
+			};
+		},
+		methods: {
+			loadList: function () {
+				const that=this; //this  ==> stands for vm6. let's save `this` to `that`
+				fetch('shoppingControl.php?act=listProduct')
+				.then(function(response) {
+					return response.json();
+				})
+				.then(function(myJson) {
+					//we are inside the callback function, now `this` means the function, not vm6
+					//we will use `that` to access vm6
+	
+					that.dat = myJson;
+					//todoApp.dat = myJson;
+				});
+			},
+			listcart: function () {
+				const that=this; 
+				fetch('shoppingControl.php?act=listCart')
+				.then(function(response) {
+					return response.json();
+				})
+                .then(function(myJson) {
+                    that.dat = myJson;
+                    that.cartTotal(); // 計算購物車總金額
+                });
+				this.setUI('cart');
+			},
+			getProductDetail: function (id) {
+				const that=this;
+				
+				let url="shoppingControl.php?act=getProductDetail&id="+id;
+				fetch(url)
+				.then(function(response) {
+					return response.json();
+				})
+				.then(function(myJson) {
+	
+	
+					that.dat = myJson;
+	
+				});
+				this.setUI('detail');
+			},
+			back: function () {
+				const that=this;
+				that.setUI('main');
+				that.loadList();
+			},
+			delCart: function (id) {
+				const that=this;
+				console.log(id);
+				let url="shoppingControl.php?act=delCart&id="+id;
+				fetch(url,{
+					method: 'POST'
+				})
+				.then(function(res){return res.text(); }) //取得傳回值，轉為文字
+				.then(function(data){
+					that.setUI('main');
+				    that.listcart();
+				})
+			},
+            cartTotal: function () {
+                const that = this;
+                fetch('shoppingControl.php?act=cartTotal')
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(myJson) {
+                    console.log('Total Price:', myJson.total_amount);
+                    that.totalPrice = myJson.total_amount;
+                })
+            },			
+			addCart: function (id) {
+				const that=this;
+				console.log(id);
+				let url="shoppingControl.php?act=addCart&id="+id;
+				fetch(url,{
+					method: 'POST',
+				})
+				.then(function(res){return res.text(); }) //取得傳回值，轉為文字
+				.then(function(data){ 
+					console.log(data);
+					that.setUI('main');
+					that.loadList();
+				})
+			},
+			setEditUI: function(job) {
+				this.newJob=job;
+				this.setUI('editForm');
+			},
+			setAddUI: function() {
+				this.newJob={
+					id: -1,
+					name: '',
+					Price: '',
+					Stock: '',
+					Content: ''
+				};
+				this.setUI('editForm');
+			},
+			setUI: function(page) {
+				this.UI=page;
+			}
+		},
+		created() {
+			this.loadList();
+		}
+	}).mount("#main");
+	</script>
+	</body></html>

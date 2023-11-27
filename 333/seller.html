@@ -1,0 +1,222 @@
+<html><head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<script type="text/javascript" src="https://unpkg.com/vue@next"></script>
+	</head>
+	
+	<body >
+	<hr />
+	<div id="main">
+	<div id="list" v-if="UI=='main'">
+		<h1>商品列表</h1>
+		<button @click="setAddUI()">新增商品</button><!--<button @click="listcart()">查看購物車</button>-->
+		<table border=1>
+			<tr><td>序號</td><td>商品名稱</td><td>價格</td><td>庫存</td><td>查看更多</td><td>修改資訊</td><td>刪除商品</td></tr>
+			<tr v-for="product in dat">
+				<td>{{product.pID}}</td>
+				<td>{{product.name}}</td>
+				<td>{{product.price}}</td>
+				<td>{{product.stock}}</td>
+                <td><button @click="getProductDetail(product.pID)">詳細資訊</button></td>
+				<td><button @click="setEditUI(product.pID, product.name, product.price, product.stock, product.content)">改</button></td><!--程式要改-->
+				<td><button @click="delProduct(product.pID)">刪</button><!--程式要改-->
+			</tr>
+		</table>
+	</div>
+	<div v-if="UI=='editForm'">
+		商品名稱: <input type="text"  v-model="newproduct.name"/> <br/>
+		價格: <input type="text"  v-model="newproduct.price"/> <br/>
+		庫存: <input type="text"  v-model="newproduct.stock"/> <br/>
+	
+		商品介紹: <textarea v-model="newproduct.content"></textarea><br>
+	
+		<input type='button' @click="updateProduct()" value="保存">
+        <input type='button' @click="Cancel()" value="取消">
+	</div>
+    <div v-if="UI=='addForm'">
+		商品名稱: <input type="text"  v-model="newproduct.name"/> <br/>
+		價格: <input type="text"  v-model="newproduct.price"/> <br/>
+		庫存: <input type="text"  v-model="newproduct.stock"/> <br/>
+	
+		商品介紹: <textarea v-model="newproduct.content"></textarea><br>
+	
+		<input type='button' @click="addProduct()" value="保存">
+        <input type='button' @click="Cancel()" value="取消">
+	</div>
+    
+	<div v-if="UI=='detail'" v-for="product in dat">
+		<h1>{{product.name}}</h1>
+		<table border=1>
+			<tr><td>商品名稱</td><td>價格</td><td>庫存</td><td>商品介紹</td></tr>
+			<tr>
+				<td>{{product.name}}</td>
+				<td>{{product.price}}</td>
+				<td>{{product.stock}}</td>
+				<td>{{product.content}}</td>
+				
+	
+			</tr>
+		</table><button @click="back()">回到商品列表</button>
+	</div>
+	</div>
+	<script>
+	const todoApp= Vue.createApp({
+		data() {
+			return {
+				UI: 'main',
+				dat: [],
+				newproduct: {
+					id: -1,
+					name: '',
+					price: '',
+					stock: '',
+					content: ''
+				}
+			}
+		},
+		methods: {
+			loadList: function () {
+				const that=this; //this  ==> stands for vm6. let's save `this` to `that`
+				fetch('shoppingControl.php?act=listProductInfo')
+				.then(function(response) {
+					return response.json();
+				})
+				.then(function(myJson) {
+					//we are inside the callback function, now `this` means the function, not vm6
+					//we will use `that` to access vm6
+	
+					that.dat = myJson;
+					//todoApp.dat = myJson;
+				});
+			},
+			listcart: function () {
+				const that=this; 
+				fetch('shoppingControl.php?act=listCart')
+				.then(function(response) {
+					return response.json();
+				})
+				.then(function(myJson) {
+	
+	
+					that.dat = myJson;
+	
+				});
+				this.setUI('cart');
+			},
+			getProductDetail: function (id) {
+				const that=this;
+				
+				let url="shoppingControl.php?act=getProductDetail&id="+id;
+				fetch(url)
+				.then(function(response) {
+					return response.json();
+				})
+				.then(function(myJson) {
+	
+	
+					that.dat = myJson;
+	
+				});
+				this.setUI('detail');
+			},
+			back: function () {
+				const that=this;
+				that.setUI('main');
+				that.loadList();
+			},
+            delProduct: function (id) {
+				const that=this;
+				console.log(id);
+				let url="shoppingControl.php?act=delProduct&id="+id;
+				fetch(url,{
+					method: 'POST'
+				})
+				.then(function(res){return res.text(); }) //取得傳回值，轉為文字
+				.then(function(data){
+					that.setUI('main');
+				    that.loadList();
+				})
+			},
+            updateProduct: function () {
+			const that=this;
+			let mydat = new FormData();
+                mydat.append( "dat", JSON.stringify(this.newproduct) );
+
+                let url="shoppingControl.php?act=updateProduct";
+                fetch(url,{
+                    method: 'POST',
+                    body: mydat // 將表單物件放入fetch的body屬性
+                })
+                .then(function(res){return res.text(); }) //取得傳回值，轉為文字
+                .then(function(data){ 
+                    console.log(data);
+                    that.setUI('main');
+                    that.loadList();
+                })
+            },
+            addProduct: function () {
+			const that=this;
+			let mydat = new FormData();
+                mydat.append( "dat", JSON.stringify(this.newproduct) );
+
+                let url="shoppingControl.php?act=addProduct";
+                fetch(url,{
+                    method: 'POST',
+                    body: mydat // 將表單物件放入fetch的body屬性
+                })
+                .then(function(res){return res.text(); }) //取得傳回值，轉為文字
+                .then(function(data){ 
+                    console.log(data);
+                    that.setUI('main');
+                    that.loadList();
+                })
+            },
+			addJob: function () {
+			const that=this;
+			let mydat = new FormData();
+                mydat.append( "dat", JSON.stringify(this.newproduct) );
+
+                let url="shoppingControl.php?act=addPro";
+                fetch(url,{
+                    method: 'POST',
+                    body: mydat // 將表單物件放入fetch的body屬性
+                })
+                .then(function(res){return res.text(); }) //取得傳回值，轉為文字
+                .then(function(data){ 
+                    console.log(data);
+                    that.setUI('main');
+                    that.loadList();
+                })
+            },
+            Cancel: function () {
+                const that=this;			
+                that.setUI('main');
+                that.loadList();
+            },
+			setEditUI: function(pID, name, price, stock, content) {
+				this.newproduct.id = pID;
+                this.newproduct.name = name;
+                this.newproduct.price = price;
+                this.newproduct.stock = stock;
+                this.newproduct.content = content;
+				this.setUI('editForm');
+			},
+			setAddUI: function() {
+				this.newproduct={
+					id: -1,
+					name: '',
+					price: '',
+					stock: '',
+					content: ''
+				};
+				this.setUI('addForm');
+			},
+			setUI: function(page) {
+				this.UI=page;
+			}
+		},
+		created() {
+			this.loadList();
+		}
+	}).mount("#main");
+	</script>
+	</body></html>
