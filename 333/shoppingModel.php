@@ -1,41 +1,10 @@
 <?php
 require('dbconfig.php');
 
-// function getJobList() {
-// 	global $db;
-// 	$sql = "select * from todo;";
-// 	$stmt = mysqli_prepare($db, $sql ); //precompile sql指令，建立statement 物件，以便執行SQL
-// 	mysqli_stmt_execute($stmt); //執行SQL
-// 	$result = mysqli_stmt_get_result($stmt); //取得查詢結果
-
-// 	$rows = array(); //要回傳的陣列
-// 	while($r = mysqli_fetch_assoc($result)) {
-// 		$rows[] = $r; //將此筆資料新增到陣列中
-// 	}
-// 	return $rows;
-// }
-
-// function addJob($jobName,$jobUrgent,$jobContent) {
-// 	global $db;
-
-// 	$sql = "insert into todo (jobName, jobUrgent, jobContent) values (?, ?, ?)"; //SQL中的 ? 代表未來要用變數綁定進去的地方
-// 	$stmt = mysqli_prepare($db, $sql); //prepare sql statement
-// 	mysqli_stmt_bind_param($stmt, "sss", $jobName, $jobUrgent,$jobContent); //bind parameters with variables, with types "sss":string, string ,string
-// 	mysqli_stmt_execute($stmt);  //執行SQL
-// 	return True;
-// }
-
-// function delJob($id) {
-// 	global $db;
-
-// 	$sql = "delete from todo where id=?;"; //SQL中的 ? 代表未來要用變數綁定進去的地方
-// 	$stmt = mysqli_prepare($db, $sql); //prepare sql statement
-// 	mysqli_stmt_bind_param($stmt, "i", $id); //bind parameters with variables, with types "sss":string, string ,string
-// 	mysqli_stmt_execute($stmt);  //執行SQL
-// 	return True;
-// }
 
 // 【客戶查看商品列表】
+// 功能：取得商品清單。使用 SELECT 語句從 product 表格中擷取 pID, name, price, stock 欄位的資料。透過 mysqli_prepare、mysqli_stmt_execute、mysqli_stmt_get_result 和mysqli_fetch_assoc 從資料庫取得資料並回傳成陣列。
+
 function listProduct(){
 	global $db;
 	$sql="select pID, name, price, stock from product;";
@@ -49,6 +18,8 @@ function listProduct(){
 	return $rows;
 }
 // 【客戶將商品放入購物車】
+// 功能：將商品加入購物車。檢查購物車中是否已有此商品，有的話增加其數量；否則新增一筆資料到購物車表格中。使用 mysqli_prepare 來準備 SQL 語句，透過 mysqli_stmt_bind_param 綁定參數，並執行相應的 SQL 語句。
+
 function addCart($pID){
 
 	global $db;
@@ -78,18 +49,14 @@ function addCart($pID){
 		mysqli_stmt_close($stmt); // Close the first statement
 
 	}
-	// //結帳後，商品庫存量減一
-	// $sql4 = "update product set stock = stock - 1 where pID=?";
-	// $stmt = mysqli_prepare($db, $sql4);
-	// mysqli_stmt_bind_param($stmt, "i", $pID);
-	// mysqli_stmt_execute($stmt);
-	// mysqli_stmt_close($stmt); 
 
 
 	return True;
 }
 
 //【客戶查看指定商品詳細資訊】	
+// 功能：取得特定商品的詳細資訊。使用 SELECT 語句根據商品編號 (pID) 從 product 表格中取得 name, price, stock, content 欄位的資料。
+
 function getProductDetail($pID){
 	global $db;
 	$sql="select name, price, stock, content from product where pID=?";
@@ -105,6 +72,8 @@ function getProductDetail($pID){
 }
 
 //【客戶查看購物車內容】
+// 功能：列出購物車內容。使用 SELECT 語句連接 product 表格和 cart 表格，取得商品名稱、價格和購買數量等資訊。
+
 function listCart(){
 	global $db;
 	$sql="select product.pID,product.name, product.price, cart.amount from product inner join cart on product.pID = cart.pID;";
@@ -118,6 +87,8 @@ function listCart(){
 	return $rows;
 }
 //【客戶刪除購物車內容】
+// 功能：刪除購物車內的特定商品。使用 DELETE 語句根據商品編號 (pID) 從 cart 表格中刪除對應的資料。
+
 function delCart($pID){
 	global $db;
 	$sql="delete from cart where pID=?;";
@@ -126,6 +97,7 @@ function delCart($pID){
 	mysqli_stmt_execute($stmt);
 	return True;
 }
+// 功能：計算購物車中所有商品的總金額。使用 SELECT 語句計算購物車中每項商品的價格和數量總和，並返回總金額。
 function cartTotal(){
     global $db;
     $sql="select sum(c.amount * p.price) as total_amount from cart c inner join product p on c.pID = p.pID;";
@@ -136,7 +108,10 @@ function cartTotal(){
     mysqli_stmt_close($stmt);
     return $row !== null ? $row : ['total_amount' => 0];
 }
+
 //【商家刪除商品項目】
+//功能：刪除特定商品。使用 DELETE 語句根據商品編號 (pID) 從 product 表格中刪除對應的商品資料。
+
 function delProduct($pID){
 	global $db;
 	$sql="delete from product where pID=?;";
@@ -146,6 +121,8 @@ function delProduct($pID){
 	return True;
 }
 
+//功能：更新商品資訊。使用 UPDATE 語句根據商品編號 (pID) 更新 product 表格中商品的名稱、價格、庫存和內容等資訊。
+
 function updateProduct($pID, $name, $price, $stock, $content){
     global $db;
 	$sql="update product set name=? , price=? , stock=? , content=? where pID=?;";
@@ -154,6 +131,7 @@ function updateProduct($pID, $name, $price, $stock, $content){
 	mysqli_stmt_execute($stmt);
 	return True;
 }
+// 功能：新增商品。使用 INSERT INTO 語句將新商品的資訊插入到 product 表格中。
 
 function addProduct($name, $price, $stock, $content){
     global $db;
@@ -163,6 +141,8 @@ function addProduct($name, $price, $stock, $content){
 	mysqli_stmt_execute($stmt);
 	return True;
 }
+
+//功能：列出所有商品的資訊。使用 SELECT * FROM product 語句從 product 表格中取得所有商品的詳細資訊。
 
 function listProductInfo(){
 	global $db;
