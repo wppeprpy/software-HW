@@ -8,10 +8,11 @@
 </head>
 <body>
 
-<table width="500" border="1">
+<table width="600" border="1">
     <tr>
         <td>ProductID</td>
         <td>Quantity</td>
+        <td>Price</td>
         <td>Total Price</td>
     </tr>
     <?php
@@ -30,7 +31,7 @@
         $productID = $rs['ProductID'];
         $quantity = $rs['Quantity'];
 
-        // 根據商品ID查詢商品價格
+        // 根據商品ID查詢商品資訊
         $productSql = "SELECT Price FROM `products` WHERE ProductID = ?";
         $productStmt = mysqli_prepare($db, $productSql);
         mysqli_stmt_bind_param($productStmt, "i", $productID);
@@ -45,6 +46,7 @@
         // 顯示在表格中
         echo "<tr><td>" , $productID,
         "</td><td>" , $quantity,
+        "</td><td>" , $price,
         "</td><td>" , $itemTotalPrice,
         "</td></tr>";
 
@@ -60,7 +62,7 @@
     mysqli_close($db);
 
     // 顯示總價
-    echo "<tr><td colspan='2'>Total:</td><td>$totalPrice</td></tr>";
+    echo "<tr><td colspan='3'>Total:</td><td>$totalPrice</td></tr>";
     ?>
 </table>
 
