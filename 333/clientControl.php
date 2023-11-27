@@ -9,12 +9,12 @@ case "listJob":
   echo json_encode($jobs);
   return;
 
-case "addJob":
+  case "addJob":
 	
 	$jsonStr = $_POST['dat'];
 	$job = json_decode($jsonStr);
 	//should verify first
-	addJob($job->name,$job->price,$job->content,$job->number);
+	addJob($job->name,$job->price,$job->content);
 	return;
 case "delJob":
 	$id=(int)$_REQUEST['id']; //$_GET, $_REQUEST
