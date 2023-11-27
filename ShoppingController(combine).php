@@ -1,6 +1,6 @@
 <?php
 // 引入必要的模型和其他文件
-require_once('login.php');
+require_once('UserModel.php');
 require_once('models/ProductModel.php');
 require_once('models/CartModel.php');
 require_once('models/OrderModel.php');
@@ -10,26 +10,54 @@ require_once('views/cartView.php');
 require_once('views/orderHistoryView.php');
 
 class ShoppingController {
-    public function login($username, $password) {
-        // 驗證用戶登錄信息
-        $isAuthenticated = authenticateUser($username, $password);
+    public function showLoginForm() {
+        include('loginView.php');
+    }
 
-        if ($isAuthenticated) {
-            // 在會話中保存登錄狀態或使用 cookie 來保持登錄狀態
-            $_SESSION['loggedIn'] = true;
-            $_SESSION['username'] = $username;
+    public function processLogin() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // 檢查是否提交了登入表單
+            if (isset($_POST['username']) && isset($_POST['password'])) {
+                $username = $_POST['username'];
+                $password = $_POST['password'];
 
-            // 重定向到首頁或其他頁面
-            header('Location: productListView.php');
-            exit;
-        } else {
-            // 登錄失敗，可能顯示錯誤消息
-            echo "Login failed. Please try again.";
-            // 或者重新導向到登錄頁面
-            // header('Location: login.php');
-            // exit;
+                // 驗證用戶是否存在
+                $isAuthenticated = $userModel->authenticate($username, $password);
+
+                if ($isAuthenticated) {
+                    // 如果登入成功，會跳轉到商品頁面
+                    session_start();
+                    $_SESSION['loggedIn'] = true;
+                    $_SESSION['username'] = $username;
+
+                    // 跳轉到商品頁面
+                    header('Location: productListView.php');
+                    exit;
+                } else {
+                    // 登入失敗，顯示錯誤消息或定向到登入頁面
+                    echo "Login failed. Please try again.";
+                    // 或者定向到登入頁面
+                    // header('Location: loginView.php');
+                    // exit;
+                }
+            } else {
+                // 缺少用戶名稱或密碼
+                echo "Username or password missing.";
+            }
         }
     }
+
+    public function logout() {
+        session_start();
+        // 清除登入狀態
+        $_SESSION = array();
+        session_destroy();
+
+        // 可以跳轉到登入頁面
+        header('Location: loginView.php');
+        exit;
+    }
+}
 	
     public function displayProductList() {
         // 獲取所有商品列表
@@ -107,6 +135,15 @@ class ShoppingController {
         }
     }
     // 其他可能的功能，比如用戶登錄、結帳等...
+}
+// 根據請求處理相應的功能
+$shoppingController = new ShoppingController();
 
+if (isset($_POST['submit'])) {
+    $shoppingController->processLogin();
+} else if (isset($_GET['action']) && $_GET['action'] === 'logout') {
+    $shoppingController->logout();
+} else {
+    $shoppingController->displayProductList();
 }
 ?>
