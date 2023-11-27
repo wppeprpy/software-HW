@@ -1,53 +1,162 @@
 <html><head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <script language="javascript">
-
-    function loadURL(URL) {
-        //向URL發出request
-        fetch(URL,{
-            method: 'POST', // or 'GET'
-        })
-        .then(function(res){ //fetch的callback function，傳回值是promise物件: res
-            //將res的內容轉為文字，傳給下一個Callback function
-            return res.text();
-        })
-        .then(function(data){ //下一個callback function，參數data是上一個callback傳進來的文字
-            
-            //找到要顯示內容的div
-            let div = document.getElementById('main');
-            //將傳進來的文字放進div中
-            div.innerHTML=data;
-        })
-    }
-    function postForm(url) {
-        //取得表單物件
-        let form = document.getElementById('myForm');
-        //用表單內容產生一個 formdata物件
-        let mydat = new FormData(form);//拿到資料
-        console.log(mydat)//可以顯示到Console
-    
-        fetch(url,{
-            method: 'POST',//以post的方式送出
-            body: mydat // 將表單物件放入fetch的body屬性
-        })
-        .then(function(res){return res.text(); }) //取得傳回值，轉為文字
-        .then(function(data){ 
-            //找到要顯示內容的div
-            let div = document.getElementById('main');
-		//將傳進來的文字放進div中
-            div.innerHTML=data;
-        })
-    }
-    </script>
+    <script type="text/javascript" src="https://unpkg.com/vue@next"></script>
     </head>
-
+    
     <body >
-    <p> 
-        <button onClick="loadURL('商品列表.php')">商品列表</button>
-        <button onclick="loadURL('購物車.php')">購物車列表</button>
-        <button onclick="loadURL('加入購物車.html')">加商品入購物車列表</button>
-        <button onclick="loadURL('移除購物車.html')">移商品出購物車列表</button>
-    </p>
-    <div id="main"></div>
+    
+    <div id="main">
+    <div id="list" v-if="UI=='main'">
+        <h1>商品清單</h1>
+        <table border=1>
+            <tr><td>ID</td><td>商品名稱</td><td>價格</td><td>商品說明</td><td>-</td></tr>
+            <tr v-for="thing in dat">
+                <td>{{thing.ProductID}}</td>
+                <td>{{thing.ProductName}}</td>
+                <td>{{thing.Price}}</td>
+                <td>{{thing.Description}}</td>
+                <td><button @click="setMoneyUI(thing)">加入購物車</button></td>
+            </tr>
+            <button @click="setUI1('editForm')">查看購物車</button>
+        </table>
+    </div>
+    
+    <div v-if="UI=='editForm'">
+        <h1>我的購物車</h1>
+        <button @click="setUI('main')">返回商品列表</button>
+        <table border=1>
+        <tr><td>ID</td><td>商品名稱</td><td>價格</td><td>商品說明</td>
+            <td>數量</td><td>總價</td>
+            <td>-</td>
+        </tr>
+        <tr v-for="thing in dat">
+            <td>{{thing.ProductID}}</td>
+            <td>{{thing.ProductName}}</td>
+            <td>{{thing.Price}}</td>
+            <td>{{thing.Description}}</td>
+            <td>{{thing.number}}</td>
+            <td>{{thing.total}}</td>
+            <td><button @click="delthing(thing.ProductID)">刪</button></td>
+        </tr>
+    </table>
+    </div>
+    <div v-if="UI=='editForm2'">
+        商品名稱: {{newthing.ProductName}} <br/>
+    
+        價格: {{newthing.price}} <br>
+    
+        商品說明: {{newthing.Description}}<br>
+        
+        數量: <input type="text" v-model="newthing.number"><br>
+    
+        <input type='button' @click="addthing(thing)" value="save">
+    </div>
+    </div>
+    
+    <script>
+    const todoApp= Vue.createApp({
+        data() {
+            return {
+                UI: 'main',
+                dat: [],
+                newthing: {
+                    id: -1,
+                    name: '',
+                    price: '',
+                    content: '',
+                    number: 0,
+                    total: 0
+                }
+            }
+        },
+        methods: {
+            loadList: function () {
+                const that=this; //this  ==> stands for vm6. let's save `this` to `that`
+                fetch('clientControl.php?act=listthing')
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(myJson) {
+                    //we are inside the callback function, now `this` means the function, not vm6
+                    //we will use `that` to access vm6
+                    that.dat = myJson;
+                    //vm6.dat = myJson;
+                });
+            },
+            loadshoppingList: function () {
+                const that=this; //this  ==> stands for vm6. let's save `this` to `that`
+                fetch('clientControl.php?act=listshopping')
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(myJson) {
+                    //we are inside the callback function, now `this` means the function, not vm6
+                    //we will use `that` to access vm6
+                    that.dat = myJson;
+                    //vm6.dat = myJson;
+                });
+            },
+            delthing: function (id) {
+                const that=this;
+                let url="clientControl.php?act=delthing&id="+id;
+                fetch(url,{
+                    method: 'POST'
+                })
+                .then(function(res){return res.text(); }) //取得傳回值，轉為文字
+                .then(function(data){
+                    console.log(data);
+                    that.setUI1('editForm');
+                    //that.loadshoppingList();
+                })
+            },
+            addthing: function () {
+                const that=this;
+                let mydat = new FormData();
+                mydat.append( "dat", JSON.stringify(this.newthing) );
+    
+                let url="clientControl.php?act=addthing";
+                fetch(url,{
+                    method: 'POST',
+                    body: mydat // 將表單物件放入fetch的body屬性
+                })
+                .then(function(res){return res.text(); }) //取得傳回值，轉為文字
+                .then(function(data){ 
+                    console.log(data);
+                    that.setUI('main');
+                    //that.loadList();
+                })
+            },
+            setMoneyUI: function(thing) {
+                this.newthing=thing;
+                this.setUI('editForm2');
+            },
+            setUI: function(page) {
+                this.UI=page;
+                this.loadList();
+            },
+            setUI1: function(page) {
+                this.UI=page;
+                this.loadshoppingList();
+            }
+        },
+        created() {
+            this.loadList();
+        }
+    }).mount("#main");
+    </script>
+    </body>
+    </html>
 
-    </body></html>
+
+
+
+
+
+
+
+
+
+
+
+
+
